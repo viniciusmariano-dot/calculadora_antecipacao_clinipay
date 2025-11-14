@@ -1,7 +1,647 @@
-import { useMemo, useState } from "react";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora Antecipação Clinipay</title>
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --orange: #f97316;
+      --orange-dark: #ea580c;
+      --green: #16a34a;
+      --green-dark: #166534;
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --radius-xl: 16px;
+      --radius-2xl: 20px;
+    }
 
-export default function CalculadoraAntecipacaoClinipay() {
-  // ======= Tabelas de Taxas =======
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #fff7ed, #f9fafb 45%, #eef2ff);
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: transparent;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 0 4px;
+      color: #111827;
+    }
+
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 34px;
+      }
+    }
+
+    .subtitle-lg {
+      font-size: 16px;
+      color: #4b5563;
+      margin: 0;
+    }
+
+    .subtitle-sm {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .lg-grid-4 {
+      grid-template-columns: 1fr;
+    }
+
+    .lg-grid-2 {
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1024px) {
+      .lg-grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .lg-grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 24px;
+      }
+    }
+
+    .card-soft {
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: #111827;
+    }
+
+    .card-title-sm {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 12px;
+      color: #374151;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .input-text {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input-text::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    .input-text:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.25);
+    }
+
+    .slider-wrapper {
+      position: relative;
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: 999px;
+      outline: none;
+      margin: 8px 0 0;
+      background: #e5e7eb;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--orange);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      cursor: pointer;
+      margin-top: -5px;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--orange);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      cursor: pointer;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .slider-label-center {
+      font-weight: 600;
+      color: var(--orange-dark);
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .pill-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill-muted {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .summary-tag {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .summary-value-main {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .summary-value-sub {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .summary-net {
+      background: #ecfdf3;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid #bbf7d0;
+    }
+
+    .summary-net-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .summary-net-value {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #166534;
+    }
+
+    .economy-card {
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+      border-radius: var(--radius-2xl);
+      padding: 18px 18px;
+      border: 1px solid #86efac;
+    }
+
+    .economy-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #15803d;
+    }
+
+    .economy-value {
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #052e16;
+    }
+
+    .economy-sub {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #166534;
+    }
+
+    .btn-primary {
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #ffffff;
+      background: linear-gradient(90deg, #f97316, #f59e0b);
+      box-shadow: 0 6px 15px rgba(248, 113, 22, 0.35);
+      transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 10px 20px rgba(248, 113, 22, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    .mt-8 {
+      margin-top: 32px;
+    }
+
+    .mt-6 {
+      margin-top: 24px;
+    }
+
+    .mt-4 {
+      margin-top: 16px;
+    }
+
+    .mb-8 {
+      margin-bottom: 32px;
+    }
+
+    .mb-6 {
+      margin-bottom: 24px;
+    }
+
+    .mb-4 {
+      margin-bottom: 16px;
+    }
+
+    .mb-3 {
+      margin-bottom: 12px;
+    }
+
+    .table-wrapper {
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: linear-gradient(90deg, #f9fafb, #e5e7eb);
+    }
+
+    th, td {
+      padding: 10px 12px;
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4b5563;
+      font-weight: 600;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+      border-bottom: 1px solid #f3f4f6;
+      color: #111827;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #ffffff;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .row-hover:hover {
+      background: #f3f4f6;
+    }
+
+    .row-selected {
+      background: #fff7ed !important;
+      border-left: 4px solid #f97316;
+    }
+
+    .row-selected td:first-child {
+      font-weight: 600;
+      color: #9a3412;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-green {
+      color: #15803d;
+      font-weight: 600;
+    }
+
+    .text-red {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .badge-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 8px;
+      background: #f97316;
+      display: inline-block;
+    }
+
+    .note-list {
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    .note-list p {
+      margin: 4px 0;
+    }
+
+    .note-list strong {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (min-width: 1024px) {
+      .lg-span-2 {
+        grid-column: span 2 / span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="container">
+    <div class="text-center mb-8">
+      <h1>Calculadora Antecipação Clinipay</h1>
+      <p class="subtitle-lg">Simulação completa de venda + Antecipação (D+1)</p>
+      <p class="subtitle-sm">Compare planos Standard vs Premium e otimize seus custos</p>
+    </div>
+
+    <!-- Top grid: parâmetros + economia/toggle -->
+    <div class="grid lg-grid-4 mb-8">
+      <!-- Parâmetros -->
+      <div class="card card-soft lg-span-2">
+        <h3 class="card-title">Parâmetros da Simulação</h3>
+
+        <div class="mb-6">
+          <label for="valorVenda" class="field-label">Valor da venda (R$)</label>
+          <input
+            id="valorVenda"
+            type="number"
+            min="0"
+            class="input-text"
+            placeholder="Ex: 20000"
+          />
+        </div>
+
+        <div>
+          <label class="field-label">Quantidade de parcelas</label>
+          <div class="slider-wrapper">
+            <input
+              id="parcelasRange"
+              type="range"
+              min="1"
+              max="21"
+              value="10"
+              class="slider"
+            />
+            <div class="slider-labels">
+              <span>1x</span>
+              <span id="parcelasLabel" class="slider-label-center">10 parcelas</span>
+              <span>21x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Economia + botão tabela -->
+      <div class="grid" style="grid-template-columns: 1fr; gap: 16px;">
+        <div class="card card-soft">
+          <h3 class="card-title-sm">Economia Premium vs Standard</h3>
+          <div class="economy-card">
+            <div class="economy-label">Você economiza</div>
+            <div id="economiaPremium" class="economy-value">R$ 0,00</div>
+            <div class="economy-sub">com o plano Premium</div>
+          </div>
+        </div>
+
+        <div class="card card-soft">
+          <button id="toggleTabelaBtn" class="btn-primary">
+            Ver tabela completa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumo Standard vs Premium -->
+    <div class="grid lg-grid-2 mb-8">
+      <div class="card card-soft">
+        <h3 class="card-title">Standard</h3>
+        <p id="standardDescricao" class="subtitle-sm" style="margin-bottom: 12px;">
+          Plano: — 
+        </p>
+        <div class="summary-grid">
+          <div style="grid-column: 1 / -1; background:#f9fafb; border-radius: 12px; padding: 10px 12px;">
+            <div class="summary-tag">Taxa de Antecipação</div>
+            <div id="standardTaxaTotal" class="summary-value-main">R$ 0,00</div>
+            <div id="standardTaxaPercent" class="summary-value-sub">(0,00%)</div>
+          </div>
+          <div class="summary-net">
+            <div class="summary-net-label">Líquido</div>
+            <div id="standardLiquido" class="summary-net-value">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-soft">
+        <h3 class="card-title">Premium</h3>
+        <p id="premiumDescricao" class="subtitle-sm" style="margin-bottom: 12px;">
+          Plano: — 
+        </p>
+        <div class="summary-grid">
+          <div style="grid-column: 1 / -1; background:#f9fafb; border-radius: 12px; padding: 10px 12px;">
+            <div class="summary-tag">Taxa de Antecipação</div>
+            <div id="premiumTaxaTotal" class="summary-value-main">R$ 0,00</div>
+            <div id="premiumTaxaPercent" class="summary-value-sub">(0,00%)</div>
+          </div>
+          <div class="summary-net">
+            <div class="summary-net-label">Líquido</div>
+            <div id="premiumLiquido" class="summary-net-value">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabelas completas -->
+    <div id="tabelasBlock" class="card card-soft hidden">
+      <h3 class="card-title" style="text-align:center; margin-bottom: 24px;">
+        Tabelas Completas de Taxas
+      </h3>
+      <div class="grid lg-grid-2" style="gap: 24px;">
+        <div>
+          <h4 class="card-title-sm" style="display:flex; align-items:center;">
+            <span class="badge-dot"></span>
+            Standard — tabela completa
+          </h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parcelas</th>
+                  <th>MDR</th>
+                  <th>Antecip.</th>
+                  <th class="text-right">Taxa Total</th>
+                  <th class="text-right">Líquido</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaStandardBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="card-title-sm" style="display:flex; align-items:center;">
+            <span class="badge-dot"></span>
+            Premium — tabela completa
+          </h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parcelas</th>
+                  <th>MDR</th>
+                  <th>Antecip.</th>
+                  <th class="text-right">Taxa Total</th>
+                  <th class="text-right">Líquido</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaPremiumBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="card card-soft mt-8">
+      <h4 class="card-title-sm">📋 Observações importantes</h4>
+      <div class="note-list">
+        <p>• <strong>Cálculo:</strong> MDR aplicado sobre o valor bruto + antecipação aplicada sobre o valor após desconto do MDR</p>
+        <p>• <strong>Taxas:</strong> Percentuais totais por quantidade de parcelas (sem capitalização mensal)</p>
+        <p>• <strong>Simulação:</strong> Valores aproximados, consulte a política vigente para informações definitivas</p>
+        <p>• <strong>Antecipação:</strong> Modalidade D+1 (recebimento no próximo dia útil)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ======= Tabelas de Taxas (mesmas do React) =======
   const taxasStandard = [
     { parcelas: 1,  label: "À vista", mdr: 0.0239, ant: 0.0199 },
     { parcelas: 2,  label: "2x",    mdr: 0.0299, ant: 0.0296 },
@@ -50,9 +690,12 @@ export default function CalculadoraAntecipacaoClinipay() {
     { parcelas: 21, label: "21x",   mdr: 0.0349, ant: 0.1844 },
   ];
 
-  const [valorVenda, setValorVenda] = useState(20000);
-  const [parcelas, setParcelas] = useState(10);
-  const [mostrarTabela, setMostrarTabela] = useState(false);
+  // ======= Estado =======
+  const state = {
+    valorVenda: 20000,
+    parcelas: 10,
+    mostrarTabela: false,
+  };
 
   const currency = new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -60,14 +703,36 @@ export default function CalculadoraAntecipacaoClinipay() {
     maximumFractionDigits: 2,
   });
 
-  function calcular(planData: typeof taxasStandard) {
-    const idx = Math.min(Math.max(parcelas, 1), 21) - 1;
+  // ======= DOM refs =======
+  const inputValor = document.getElementById("valorVenda");
+  const sliderParcelas = document.getElementById("parcelasRange");
+  const labelParcelas = document.getElementById("parcelasLabel");
+  const economiaPremiumEl = document.getElementById("economiaPremium");
+  const toggleTabelaBtn = document.getElementById("toggleTabelaBtn");
+  const tabelasBlock = document.getElementById("tabelasBlock");
+  const tabelaStandardBody = document.getElementById("tabelaStandardBody");
+  const tabelaPremiumBody = document.getElementById("tabelaPremiumBody");
+
+  const standardDescricao = document.getElementById("standardDescricao");
+  const premiumDescricao = document.getElementById("premiumDescricao");
+  const standardTaxaTotal = document.getElementById("standardTaxaTotal");
+  const standardTaxaPercent = document.getElementById("standardTaxaPercent");
+  const standardLiquido = document.getElementById("standardLiquido");
+  const premiumTaxaTotal = document.getElementById("premiumTaxaTotal");
+  const premiumTaxaPercent = document.getElementById("premiumTaxaPercent");
+  const premiumLiquido = document.getElementById("premiumLiquido");
+
+  // Inicializar valor da venda
+  inputValor.value = state.valorVenda;
+
+  function calcular(planData) {
+    const idx = Math.min(Math.max(state.parcelas, 1), 21) - 1;
     const item = planData[idx];
-    const mdrValor = valorVenda * item.mdr;
-    const baseAnt = valorVenda - mdrValor;
+    const mdrValor = state.valorVenda * item.mdr;
+    const baseAnt = state.valorVenda - mdrValor;
     const antValor = baseAnt * item.ant;
     const taxaTotal = mdrValor + antValor;
-    const liquido = valorVenda - taxaTotal;
+    const liquido = state.valorVenda - taxaTotal;
 
     return {
       item,
@@ -75,179 +740,123 @@ export default function CalculadoraAntecipacaoClinipay() {
       liquido,
       mdrValor,
       antValor,
-      efetivaSobreBruto: taxaTotal / valorVenda, // taxa total em % do bruto
+      efetivaSobreBruto: state.valorVenda > 0 ? taxaTotal / state.valorVenda : 0,
     };
   }
 
-  const resultadoStandard = useMemo(() => calcular(taxasStandard), [valorVenda, parcelas]);
-  const resultadoPremium = useMemo(() => calcular(taxasPremium), [valorVenda, parcelas]);
+  // Slider background dinâmico
+  function updateSliderBackground() {
+    const pct = ((state.parcelas - 1) / 20) * 100;
+    sliderParcelas.style.background = 
+      `linear-gradient(to right, #F97316 0%, #F97316 ${pct}%, #E5E7EB ${pct}%, #E5E7EB 100%)`;
+  }
 
-  const economiaPremium = useMemo(
-    () => resultadoStandard.taxaTotal - resultadoPremium.taxaTotal,
-    [resultadoStandard, resultadoPremium]
-  );
+  // Render principal
+  function render() {
+    // Atualizar labels básicas
+    labelParcelas.textContent = state.parcelas + " parcela" + (state.parcelas > 1 ? "s" : "");
+    updateSliderBackground();
 
-  const linhaResumo = (titulo: string, r: ReturnType<typeof calcular>) => (
-    <div className="rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white">
-      <h3 className="text-lg font-semibold mb-3 text-gray-900">{titulo}</h3>
-      <p className="text-sm text-gray-600 mb-4">Plano: {r.item.label} ({parcelas} parcela{parcelas>1?"s":""})</p>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Taxa de Antecipação</p>
-          <p className="font-semibold text-gray-900 mt-1">{currency.format(r.taxaTotal)}</p>
-          <p className="text-xs text-gray-500">({(r.efetivaSobreBruto*100).toFixed(2)}%)</p>
-        </div>
-        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
-          <p className="text-xs text-green-600 uppercase tracking-wide font-medium col-span-2">Líquido</p>
-          <p className="font-bold text-green-700 mt-1">{currency.format(r.liquido)}</p>
-        </div>
-      </div>
-    </div>
-  );
+    const resultadoStandard = calcular(taxasStandard);
+    const resultadoPremium = calcular(taxasPremium);
+    const economia = Math.max(0, resultadoStandard.taxaTotal - resultadoPremium.taxaTotal);
 
-  const tabelaPlan = (titulo: string, planData: typeof taxasStandard) => (
-    <div className="mt-8">
-      <h4 className="font-semibold mb-4 text-gray-900 flex items-center">
-        <span className="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>
-        {titulo} — tabela completa
-      </h4>
-      <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-        <table className="min-w-full">
-          <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">Parcelas</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">MDR</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">Antecip.</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wide">Taxa Total</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wide">Líquido</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {planData.map((it, index) => {
-              const mdrValor = valorVenda * it.mdr;
-              const antValor = (valorVenda - mdrValor) * it.ant;
-              const taxaTotal = mdrValor + antValor;
-              const liquido = valorVenda - taxaTotal;
-              const isSelected = it.parcelas === parcelas;
-              return (
-                <tr 
-                  key={`${titulo}-${it.parcelas}`} 
-                  className={`transition-colors duration-150 ${
-                    isSelected 
-                      ? 'bg-orange-50 border-l-4 border-l-orange-500' 
-                      : index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'
-                  }`}
-                >
-                  <td className={`px-4 py-3 ${isSelected ? 'font-semibold text-orange-900' : 'text-gray-900'}`}>
-                    {it.label}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700 font-mono text-sm">{(it.mdr*100).toFixed(2)}%</td>
-                  <td className="px-4 py-3 text-gray-700 font-mono text-sm">{(it.ant*100).toFixed(2)}%</td>
-                  <td className="px-4 py-3 text-right font-semibold text-red-600">{currency.format(taxaTotal)}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-green-600">{currency.format(liquido)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+    // Standard
+    standardDescricao.textContent =
+      "Plano: " + resultadoStandard.item.label + " (" + state.parcelas + " parcela" + (state.parcelas > 1 ? "s" : "") + ")";
+    standardTaxaTotal.textContent = currency.format(resultadoStandard.taxaTotal);
+    standardTaxaPercent.textContent = "(" + (resultadoStandard.efetivaSobreBruto * 100).toFixed(2) + "%)";
+    standardLiquido.textContent = currency.format(resultadoStandard.liquido);
 
-  return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="mx-auto max-w-6xl p-6">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Calculadora Antecipação Clinipay</h1>
-          <p className="text-lg text-gray-600">Simulação completa de venda + Antecipação (D+1)</p>
-          <p className="text-sm text-gray-500 mt-1">Compare planos Standard vs Premium e otimize seus custos</p>
-        </div>
+    // Premium
+    premiumDescricao.textContent =
+      "Plano: " + resultadoPremium.item.label + " (" + state.parcelas + " parcela" + (state.parcelas > 1 ? "s" : "") + ")";
+    premiumTaxaTotal.textContent = currency.format(resultadoPremium.taxaTotal);
+    premiumTaxaPercent.textContent = "(" + (resultadoPremium.efetivaSobreBruto * 100).toFixed(2) + "%)";
+    premiumLiquido.textContent = currency.format(resultadoPremium.liquido);
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 mb-8">
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Parâmetros da Simulação</h3>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Valor da venda (R$)</label>
-              <input
-                type="number"
-                min={0}
-                value={valorVenda}
-                onChange={(e) => setValorVenda(Number(e.target.value))}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-lg font-semibold outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                placeholder="Ex: 20000"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Quantidade de parcelas</label>
-              <div className="relative">
-                <input
-                  type="range"
-                  min={1}
-                  max={21}
-                  value={parcelas}
-                  onChange={(e) => setParcelas(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  style={{
-                    background: `linear-gradient(to right, #F97316 0%, #F97316 ${((parcelas-1)/20)*100}%, #E5E7EB ${((parcelas-1)/20)*100}%, #E5E7EB 100%)`
-                  }}
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>1x</span>
-                  <span className="font-semibold text-orange-600 text-sm">{parcelas} parcela{parcelas>1?"s":""}</span>
-                  <span>21x</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    // Economia
+    economiaPremiumEl.textContent = currency.format(economia);
 
-          <div className="lg:col-span-2 grid grid-cols-1 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Economia Premium vs Standard</h3>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-                <div className="text-xs text-green-700 uppercase tracking-wide font-medium">Você economiza</div>
-                <div className="text-2xl font-bold text-green-900 mt-1">{currency.format(Math.max(0, economiaPremium))}</div>
-                <div className="text-xs text-green-600 mt-1">com o plano Premium</div>
-              </div>
-            </div>
+    // Tabelas completas
+    if (state.mostrarTabela) {
+      tabelasBlock.classList.remove("hidden");
+      renderTabela(tabelaStandardBody, taxasStandard);
+      renderTabela(tabelaPremiumBody, taxasPremium);
+    } else {
+      tabelasBlock.classList.add("hidden");
+    }
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-              <button
-                onClick={() => setMostrarTabela((m) => !m)}
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl px-4 py-3 font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                {mostrarTabela ? "Ocultar tabela completa" : "Ver tabela completa"}
-              </button>
-            </div>
-          </div>
-        </div>
+    toggleTabelaBtn.textContent = state.mostrarTabela
+      ? "Ocultar tabela completa"
+      : "Ver tabela completa";
+  }
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
-          {linhaResumo("Standard", resultadoStandard)}
-          {linhaResumo("Premium", resultadoPremium)}
-        </div>
+  function renderTabela(tbody, planData) {
+    tbody.innerHTML = "";
+    planData.forEach((it, index) => {
+      const mdrValor = state.valorVenda * it.mdr;
+      const antValor = (state.valorVenda - mdrValor) * it.ant;
+      const taxaTotal = mdrValor + antValor;
+      const liquido = state.valorVenda - taxaTotal;
+      const isSelected = it.parcelas === state.parcelas;
 
-        {mostrarTabela && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Tabelas Completas de Taxas</h3>
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-              {tabelaPlan("Standard", taxasStandard)}
-              {tabelaPlan("Premium", taxasPremium)}
-            </div>
-          </div>
-        )}
+      const tr = document.createElement("tr");
+      tr.className = (isSelected ? "row-selected " : "") + "row-hover";
 
-        <div className="mt-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <h4 className="font-semibold text-gray-900 mb-3">📋 Observações importantes</h4>
-          <div className="text-sm text-gray-600 space-y-2">
-            <p>• <strong>Cálculo:</strong> MDR aplicado sobre o valor bruto + antecipação aplicada sobre o valor após desconto do MDR</p>
-            <p>• <strong>Taxas:</strong> Percentuais totais por quantidade de parcelas (sem capitalização mensal)</p>
-            <p>• <strong>Simulação:</strong> Valores aproximados, consulte a política vigente para informações definitivas</p>
-            <p>• <strong>Antecipação:</strong> Modalidade D+1 (recebimento no próximo dia útil)</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = it.label;
+      tr.appendChild(tdLabel);
+
+      const tdMdr = document.createElement("td");
+      tdMdr.textContent = (it.mdr * 100).toFixed(2) + "%";
+      tdMdr.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+      tdMdr.style.fontSize = "12px";
+      tr.appendChild(tdMdr);
+
+      const tdAnt = document.createElement("td");
+      tdAnt.textContent = (it.ant * 100).toFixed(2) + "%";
+      tdAnt.style.fontFamily = tdMdr.style.fontFamily;
+      tdAnt.style.fontSize = "12px";
+      tr.appendChild(tdAnt);
+
+      const tdTaxa = document.createElement("td");
+      tdTaxa.textContent = currency.format(taxaTotal);
+      tdTaxa.className = "text-right text-red";
+      tr.appendChild(tdTaxa);
+
+      const tdLiq = document.createElement("td");
+      tdLiq.textContent = currency.format(liquido);
+      tdLiq.className = "text-right text-green";
+      tr.appendChild(tdLiq);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Eventos
+  inputValor.addEventListener("input", function() {
+    const v = parseFloat(inputValor.value.replace(",", "."));
+    state.valorVenda = isNaN(v) || v < 0 ? 0 : v;
+    render();
+  });
+
+  sliderParcelas.addEventListener("input", function() {
+    const v = parseInt(sliderParcelas.value, 10);
+    state.parcelas = Math.min(Math.max(v, 1), 21);
+    render();
+  });
+
+  toggleTabelaBtn.addEventListener("click", function() {
+    state.mostrarTabela = !state.mostrarTabela;
+    render();
+  });
+
+  // Init
+  updateSliderBackground();
+  render();
+})();
+</script>
+</body>
+</html>
+
